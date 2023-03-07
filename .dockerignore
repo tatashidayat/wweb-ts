@@ -2,3 +2,5 @@ node_modules
 .vscode
 build
 .wwebjs_auth
+docker
+README.md
