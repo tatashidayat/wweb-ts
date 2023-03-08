@@ -9,8 +9,13 @@ import {
 import socketIO = require('socket.io');
 import qrcode = require('qrcode');
 import http = require('http');
+import {sequelize} from './common/db/db';
+import {User} from './user/user.model';
+import {UserMessageHandler} from './whatsapp/userMessageHandler';
 
 const start = async (): Promise<void> => {
+  const dbInit = initDb();
+
   const client = new Client({
     restartOnAuthFail: true,
     puppeteer: {
@@ -30,6 +35,7 @@ const start = async (): Promise<void> => {
   });
 
   const waService = new WhatsAppService(client);
+  const userMessageHandler = new UserMessageHandler();
 
   waService.on(WhatsAppServiceState.UNINITIALIZED, () => {
     console.log('WA Uninitialized');
@@ -57,19 +63,22 @@ const start = async (): Promise<void> => {
     console.log('WA Disconnected', reason);
   });
 
-  waService.on(WhatsAppServiceState.MESSAGE, async (message: Message) => {
+  waService.on(WhatsAppServiceState.MESSAGE, (message: Message) => {
     console.log(`Recieve Message from:${message.from} message:${message.body}`);
-    // getId by phoneNumber
-    // check command + userRole
-    // #1 => USER,ADMIN
-    // #2 => ADMIN
-    await message.reply('Oke di proses dulu');
-    // action
-    await message.reply('Hasil ini: blabla');
+    const keyword = waService.getKeywordFromMessage(
+      message,
+      userMessageHandler
+    );
+
+    if (keyword) {
+      userMessageHandler.onMessage(message, keyword);
+      return;
+    }
+    message.reply('Perintah tidak dikenal');
   });
 
   startServer(waService);
-  await waService.init();
+  await Promise.all([dbInit, waService.init()]);
 };
 
 const startServer = (waService: WhatsAppService) => {
@@ -153,6 +162,9 @@ const startServer = (waService: WhatsAppService) => {
   });
 };
 
-const initDb = async (): Promise<void> => {};
+const initDb = async (): Promise<void> => {
+  // sequelize.addModels([User]);
+  // await sequelize.sync();
+};
 
 start();

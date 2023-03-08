@@ -1,7 +1,13 @@
-interface MessageKeyword {
+interface Keyword {
   key: string;
 }
 
-interface MessageKeywordWithArguments extends MessageKeyword {
-  arguments: Array<string>;
+interface KeywordDetails extends Keyword {
+  description: string;
+  arguments: string[];
+}
+
+interface ParsedKeyword {
+  key: string;
+  arguments: string[];
 }

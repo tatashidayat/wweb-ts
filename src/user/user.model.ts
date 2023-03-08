@@ -27,22 +27,28 @@ export interface UserCreationAttributes
   tableName: 'user',
 })
 export class User extends Model<UserAttributes, UserCreationAttributes> {
-  @Column
+  @Index
   @PrimaryKey
   @AllowNull(false)
-  @Index
+  @Column
   id!: string;
 
-  @Column
   @AllowNull(false)
+  @Column
   name!: string;
 
-  @Column(DataTypes.ENUM)
   @Default(UserStatus.REGISTERED)
   @AllowNull(false)
+  @Column(
+    DataTypes.ENUM(
+      UserStatus.REGISTERED,
+      UserStatus.ACTIVE,
+      UserStatus.INACTIVE
+    )
+  )
   status!: UserStatus;
 
-  @Column(DataTypes.ENUM)
   @AllowNull(false)
+  @Column(DataTypes.ENUM(UserRole.ADMIN, UserRole.USER))
   role!: UserRole;
 }

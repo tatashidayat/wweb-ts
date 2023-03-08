@@ -1,5 +1,6 @@
 import {EventEmitter} from 'events';
-import {Client, ClientSession, WAState} from 'whatsapp-web.js';
+import {Client, ClientSession, Message, WAState} from 'whatsapp-web.js';
+import {MessageHandler, RegisteredKeyword} from './messageHandler';
 
 export enum WhatsAppServiceState {
   UNINITIALIZED = 'UNINITIALIZED',
@@ -72,5 +73,29 @@ export class WhatsAppService extends EventEmitter {
     this._state = WhatsAppServiceState.INITIALIZED;
   };
 
-  // on(event: string | symbol, listener: (...args: any[]) => void): this;
+  getKeywordFromMessage(
+    message: Message,
+    handler: MessageHandler
+  ): RegisteredKeyword | undefined {
+    const messageTexts = message.body.split('#');
+    const parsedKeyword: ParsedKeyword = {
+      key: messageTexts.at(0)!,
+      arguments:
+        (messageTexts.length > 1 &&
+          messageTexts.copyWithin(messageTexts.length - 1, 1)) ||
+        [],
+    };
+    const handlerKeyword = handler.keywords.find(
+      k => k.key === parsedKeyword.key
+    );
+
+    if (handlerKeyword) {
+      return {
+        key: parsedKeyword.key,
+        details: handlerKeyword,
+        parsed: parsedKeyword,
+      };
+    }
+    return undefined;
+  }
 }
