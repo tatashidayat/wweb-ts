@@ -11,7 +11,7 @@ import qrcode = require('qrcode');
 import http = require('http');
 import {sequelize} from './common/db/db';
 import {User} from './user/user.model';
-import {UserMessageHandler} from './whatsapp/userMessageHandler';
+import {UserMessageHandler} from './whatsapp/user.messageHandler';
 
 const start = async (): Promise<void> => {
   const dbInit = initDb();
