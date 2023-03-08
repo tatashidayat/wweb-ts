@@ -1,6 +1,7 @@
 import {EventEmitter} from 'events';
 import {Client, ClientSession, Message, WAState} from 'whatsapp-web.js';
 import {MessageHandler, RegisteredKeyword} from './messageHandler';
+import {ParsedKeyword} from './../types/MessageKeyword';
 
 export enum WhatsAppServiceState {
   UNINITIALIZED = 'UNINITIALIZED',
@@ -53,6 +54,10 @@ export class WhatsAppService extends EventEmitter {
       this.emit(this._state, reason);
       this._client.destroy();
       this._client.initialize();
+    });
+
+    this._client.on('message', (message: Message) => {
+      this.emit(WhatsAppServiceState.MESSAGE, message);
     });
   }
 
