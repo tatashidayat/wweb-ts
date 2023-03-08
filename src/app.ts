@@ -1,7 +1,10 @@
 import * as express from 'express';
 import * as qrcodeTerminal from 'qrcode-terminal';
 import {Client, LocalAuth, Message, WAState} from 'whatsapp-web.js';
-import {WhatsAppService, WhatsAppServiceState} from './service/WhatsAppService';
+import {
+  WhatsAppService,
+  WhatsAppServiceState,
+} from './whatsapp/whatsApp.service';
 
 import socketIO = require('socket.io');
 import qrcode = require('qrcode');
@@ -54,21 +57,28 @@ const start = async (): Promise<void> => {
     console.log('WA Disconnected', reason);
   });
 
-  waService.on(WhatsAppServiceState.MESSAGE, (message: Message) => {
+  waService.on(WhatsAppServiceState.MESSAGE, async (message: Message) => {
     console.log(`Recieve Message from:${message.from} message:${message.body}`);
+    // getId by phoneNumber
+    // check command + userRole
+    // #1 => USER,ADMIN
+    // #2 => ADMIN
+    await message.reply('Oke di proses dulu');
+    // action
+    await message.reply('Hasil ini: blabla');
   });
 
   startServer(waService);
   await waService.init();
 };
 
-const port = process.env.PORT || 8000;
-
-const app = express();
-const server = http.createServer(app);
-const io = new socketIO.Server(server);
-
 const startServer = (waService: WhatsAppService) => {
+  const port = process.env.PORT || 8000;
+
+  const app = express();
+  const server = http.createServer(app);
+  const io = new socketIO.Server(server);
+
   app.use(express.json());
   app.use(
     express.urlencoded({
@@ -142,5 +152,7 @@ const startServer = (waService: WhatsAppService) => {
     console.log('Server is started on port:', port);
   });
 };
+
+const initDb = async (): Promise<void> => {};
 
 start();

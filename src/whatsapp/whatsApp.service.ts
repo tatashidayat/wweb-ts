@@ -71,4 +71,6 @@ export class WhatsAppService extends EventEmitter {
     await this._client.initialize();
     this._state = WhatsAppServiceState.INITIALIZED;
   };
+
+  // on(event: string | symbol, listener: (...args: any[]) => void): this;
 }
