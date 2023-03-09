@@ -95,12 +95,12 @@ export class CombinedMessageHandler extends BaseMessageHandler {
     }
     let mHandler: MessageHandler | undefined;
 
-    if (nonUserKeyword) {
-      mHandler = this._nonUserHandler;
-    } else if (userKeyword) {
-      mHandler = this._userHandler;
-    } else if (adminKeyword) {
+    if (adminKeyword && user?.isAdmin) {
       mHandler = this._adminHandler;
+    } else if (userKeyword && user?.isActive) {
+      mHandler = this._userHandler;
+    } else if (nonUserKeyword) {
+      mHandler = this._nonUserHandler;
     }
 
     await mHandler?.onMessage(message, parsedKeyword);
