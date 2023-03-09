@@ -1,5 +1,16 @@
-import {Sequelize} from 'sequelize-typescript';
+import {DataSource} from 'typeorm';
+import {User} from '../../user/user.model';
 
-export const sequelize = new Sequelize(
-  'postgres://pgwweb:pgpassword@192.168.1.200:5432/wweb'
-);
+export const AppDataSource = new DataSource({
+  type: 'postgres',
+  host: '192.168.1.200',
+  port: 5432,
+  username: 'pgwweb',
+  password: 'pgpassword',
+  database: 'wweb',
+  synchronize: true,
+  logging: false,
+  entities: [User],
+  subscribers: [],
+  migrations: [],
+});

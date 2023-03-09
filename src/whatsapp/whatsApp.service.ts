@@ -69,6 +69,13 @@ export class WhatsAppService extends EventEmitter {
     return this._lastQR;
   }
 
+  set messageHandler(handler: MessageHandler) {
+    this._client.on('message', (message: Message) => {
+      const k = this.getKeywordFromMessage(message, handler);
+      handler.onMessage(message, k);
+    });
+  }
+
   init = async (): Promise<void> => {
     if (this._state === WhatsAppServiceState.READY) {
       return;

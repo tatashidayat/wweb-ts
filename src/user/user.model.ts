@@ -1,54 +1,34 @@
-import {DataTypes, Optional} from 'sequelize';
-import {
-  AllowNull,
-  Column,
-  Default,
-  Index,
-  Model,
-  PrimaryKey,
-  Table,
-} from 'sequelize-typescript';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import {Column, Entity, PrimaryColumn} from 'typeorm';
 import {UserRole, UserStatus} from '../common/constant/role';
 
-export interface UserAttributes {
-  id: string;
-  name: string;
-  status: UserStatus;
-  role: UserRole;
-}
-
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface UserCreationAttributes
-  extends Optional<UserAttributes, 'id'> {}
-
-@Table({
-  timestamps: true,
-  modelName: 'User',
-  tableName: 'user',
+@Entity({
+  name: 'users',
+  synchronize: true,
 })
-export class User extends Model<UserAttributes, UserCreationAttributes> {
-  @Index
-  @PrimaryKey
-  @AllowNull(false)
-  @Column
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export class User {
+  @PrimaryColumn()
   id!: string;
 
-  @AllowNull(false)
-  @Column
+  @Column()
   name!: string;
 
-  @Default(UserStatus.REGISTERED)
-  @AllowNull(false)
-  @Column(
-    DataTypes.ENUM(
-      UserStatus.REGISTERED,
-      UserStatus.ACTIVE,
-      UserStatus.INACTIVE
-    )
-  )
+  @Column({enum: UserStatus, default: UserStatus.REGISTERED})
   status!: UserStatus;
 
-  @AllowNull(false)
-  @Column(DataTypes.ENUM(UserRole.ADMIN, UserRole.USER))
+  @Column({enum: UserRole})
   role!: UserRole;
+
+  get isActive(): boolean {
+    return this.status === UserStatus.ACTIVE;
+  }
+
+  get isAdmin(): boolean {
+    return this.role === UserRole.ADMIN;
+  }
+
+  get isRegularUser(): boolean {
+    return this.role === UserRole.USER;
+  }
 }

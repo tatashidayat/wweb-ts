@@ -1,5 +1,6 @@
 import * as express from 'express';
 import * as qrcodeTerminal from 'qrcode-terminal';
+import 'reflect-metadata';
 import {Client, LocalAuth, Message, WAState} from 'whatsapp-web.js';
 import {
   WhatsAppService,
@@ -9,9 +10,10 @@ import {
 import socketIO = require('socket.io');
 import qrcode = require('qrcode');
 import http = require('http');
-import {sequelize} from './common/db/db';
-import {User} from './user/user.model';
+
+import {AppDataSource} from './common/db/db';
 import {UserMessageHandler} from './whatsapp/user.messageHandler';
+import {CombinedMessageHandler} from './whatsapp/combined.messageHandler';
 
 const start = async (): Promise<void> => {
   const dbInit = initDb();
@@ -35,7 +37,8 @@ const start = async (): Promise<void> => {
   });
 
   const waService = new WhatsAppService(client);
-  const userMessageHandler = new UserMessageHandler();
+  const messageHandler = new CombinedMessageHandler();
+  waService.messageHandler = messageHandler;
 
   waService.on(WhatsAppServiceState.UNINITIALIZED, () => {
     console.log('WA Uninitialized');
@@ -65,16 +68,6 @@ const start = async (): Promise<void> => {
 
   waService.on(WhatsAppServiceState.MESSAGE, (message: Message) => {
     console.log(`Recieve Message from:${message.from} message:${message.body}`);
-    const keyword = waService.getKeywordFromMessage(
-      message,
-      userMessageHandler
-    );
-
-    if (keyword) {
-      userMessageHandler.onMessage(message, keyword);
-      return;
-    }
-    message.reply('Perintah tidak dikenal');
   });
 
   startServer(waService);
@@ -130,6 +123,21 @@ const startServer = (waService: WhatsAppService) => {
     waService.on(WhatsAppServiceState.AUTH_FAILED, onAuthFailed);
     waService.on(WhatsAppServiceState.DISCONNECTED, onDisconnected);
 
+    socket.on('disconnect', (reason: socketIO.DisconnectReason) => {
+      console.log(`socket: ${socket.id} is disconnect due to`, reason);
+      waService.removeListener(WhatsAppServiceState.QR, onQR);
+      waService.removeListener(WhatsAppServiceState.READY, onReady);
+      waService.removeListener(
+        WhatsAppServiceState.AUTHENTICATED,
+        onAuthenticated
+      );
+      waService.removeListener(WhatsAppServiceState.AUTH_FAILED, onAuthFailed);
+      waService.removeListener(
+        WhatsAppServiceState.DISCONNECTED,
+        onDisconnected
+      );
+    });
+
     const firstState = waService.state;
 
     if (firstState === WhatsAppServiceState.UNINITIALIZED) {
@@ -163,8 +171,8 @@ const startServer = (waService: WhatsAppService) => {
 };
 
 const initDb = async (): Promise<void> => {
-  // sequelize.addModels([User]);
-  // await sequelize.sync();
+  await AppDataSource.initialize();
+  console.log('DB has been initiliazed');
 };
 
 start();
