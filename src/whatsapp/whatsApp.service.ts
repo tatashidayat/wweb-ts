@@ -92,10 +92,7 @@ export class WhatsAppService extends EventEmitter {
     const messageTexts = message.body.split('#');
     const parsedKeyword: ParsedKeyword = {
       key: messageTexts.at(0)!,
-      arguments:
-        (messageTexts.length > 1 &&
-          messageTexts.copyWithin(messageTexts.length - 1, 1)) ||
-        [],
+      arguments: (messageTexts.length > 1 && messageTexts.slice(1)) || [],
     };
     const handlerKeyword = handler.keywords.find(
       k => k.key === parsedKeyword.key

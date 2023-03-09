@@ -52,7 +52,7 @@ export class CombinedMessageHandler extends BaseMessageHandler {
     const nonUserKeyword = this._nonUserHandler.keywords.find(
       k => k.key === parsedKeyword?.key
     );
-    const phoneNumber: string = from.at(1)!;
+    const phoneNumber: string = from.at(0)!;
 
     const user = await this._userRepo.getById(phoneNumber);
 
