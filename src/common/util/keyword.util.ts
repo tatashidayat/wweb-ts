@@ -16,6 +16,7 @@ export abstract class KeywordUtil {
       sb.push(`${cmd.key.padStart(mostLengthKey, ' ')}: ${cmd.description}.\n`);
       let usageText = `${''.padStart(mostLengthKey, ' ')}Usage: ${cmd.key}`;
       if (cmd.arguments.length > 0) {
+        usageText += '#';
         usageText += cmd.arguments.join('#');
       }
       sb.push(`${usageText}\n`);

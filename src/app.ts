@@ -12,7 +12,6 @@ import qrcode = require('qrcode');
 import http = require('http');
 
 import {AppDataSource} from './common/db/db';
-import {UserMessageHandler} from './whatsapp/user.messageHandler';
 import {CombinedMessageHandler} from './whatsapp/combined.messageHandler';
 
 const start = async (): Promise<void> => {
